@@ -2,7 +2,7 @@ version: "3"
 
 services:
   backend:
-    image: frappe/erpnext:v15.77.0
+    image: frappe/erpnext:latest
     networks:
       - frappe_network
     deploy:
@@ -18,7 +18,7 @@ services:
       MARIADB_ROOT_PASSWORD: admin
 
   configurator:
-    image: frappe/erpnext:v15.77.0
+    image: frappe/erpnext:latest
     networks:
       - frappe_network
     deploy:
@@ -47,7 +47,7 @@ services:
       - logs:/home/frappe/frappe-bench/logs
 
   create-site:
-    image: frappe/erpnext:v15.77.0
+    image: frappe/erpnext:latest
     networks:
       - frappe_network
     deploy:
@@ -102,7 +102,7 @@ services:
       - db-data:/var/lib/mysql
 
   frontend:
-    image: frappe/erpnext:v15.77.0
+    image: frappe/erpnext:latest
     networks:
       - frappe_network
     depends_on:
@@ -126,6 +126,7 @@ services:
       - logs:/home/frappe/frappe-bench/logs
     # ports:
     #   - "8080:8080"
+    container_name: frontend
     expose:
       - "8080"
     labels:
@@ -140,7 +141,7 @@ services:
       - traefik.http.services.erp.loadbalancer.server.port=8080
 
   queue-long:
-    image: frappe/erpnext:v15.77.0
+    image: frappe/erpnext:latest
     networks:
       - frappe_network
     deploy:
@@ -156,7 +157,7 @@ services:
       - logs:/home/frappe/frappe-bench/logs
 
   queue-short:
-    image: frappe/erpnext:v15.77.0
+    image: frappe/erpnext:latest
     networks:
       - frappe_network
     deploy:
@@ -180,6 +181,8 @@ services:
         condition: on-failure
     volumes:
       - redis-queue-data:/data
+    expose:
+      - "6379"
 
   redis-cache:
     image: redis:6.2-alpine
@@ -188,9 +191,11 @@ services:
     deploy:
       restart_policy:
         condition: on-failure
+    expose:
+      - "6379"
 
   scheduler:
-    image: frappe/erpnext:v15.77.0
+    image: frappe/erpnext:latest
     networks:
       - frappe_network
     deploy:
@@ -204,12 +209,15 @@ services:
       - logs:/home/frappe/frappe-bench/logs
 
   websocket:
-    image: frappe/erpnext:v15.77.0
+    image: frappe/erpnext:latest
     networks:
       - frappe_network
     deploy:
       restart_policy:
         condition: on-failure
+    environment:
+      REDIS_CACHE: redis-cache:6379
+      REDIS_QUEUE: redis-queue:6379
     command:
       - node
       - /home/frappe/frappe-bench/apps/frappe/socketio.js
