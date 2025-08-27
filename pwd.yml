@@ -126,6 +126,18 @@ services:
       - logs:/home/frappe/frappe-bench/logs
     # ports:
     #   - "8080:8080"
+    expose:
+      - "8080"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.erp-http.rule=Host(`erp.vexcs.com`)
+      - traefik.http.routers.erp-http.entrypoints=http
+      - traefik.http.middlewares.erp-redirect.redirectscheme.scheme=https
+      - traefik.http.routers.erp-http.middlewares=erp-redirect
+      - traefik.http.routers.erp-https.rule=Host(`erp.vexcs.com`)
+      - traefik.http.routers.erp-https.entrypoints=https
+      - traefik.http.routers.erp-https.tls.certresolver=letsencrypt
+      - traefik.http.services.erp.loadbalancer.server.port=8080
 
   queue-long:
     image: frappe/erpnext:v15.77.0
